@@ -71,14 +71,22 @@ def get_ns_env(name, default="", fallback_to_base=False):
     return os.environ.get(name, default)
 
 
+def get_ns_env_name(name):
+    """返回当前账号实际应该配置的环境变量名。"""
+    return f"{name}_{NS_ACCOUNT}" if NS_ACCOUNT else name
+
+
 ## 获取NodeSeek Cookie环境变量
 NS_COOKIE = get_ns_env("NS_COOKIE", "")
+NS_COOKIE_ENV_NAME = get_ns_env_name("NS_COOKIE")
 
 ## NodeSeek签到模式：true->随机签到 false->固定签到，默认随机签到
 NS_RANDOM = get_ns_env("NS_RANDOM", "true", fallback_to_base=True)
+NS_RANDOM_ENV_NAME = get_ns_env_name("NS_RANDOM")
 
 ## NodeSeek成员ID，https://www.nodeseek.com/space/26589 ->26589就是成员ID
 NS_MEMBER_ID = get_ns_env("NS_MEMBER_ID", "")
+NS_MEMBER_ID_ENV_NAME = get_ns_env_name("NS_MEMBER_ID")
 
 # 钉钉机器人通知（本地运行，直接填写下面三个环境变量即可）
 ## 本地运行请给为True，默认为False，调用青龙系统通知API
@@ -118,7 +126,7 @@ def ns_info(ns_member_id):
     """
     if not ns_member_id:
         print(
-            "未设置NodeSeek成员ID，请检测NS_MEMBER_ID环境变量设置是否正确，跳过NodeSeek用户信息获取"
+            f"未设置NodeSeek成员ID，请检查{NS_MEMBER_ID_ENV_NAME}环境变量设置是否正确，跳过NodeSeek用户信息获取"
         )
         return ""
 
@@ -157,8 +165,8 @@ def ns_signin(ns_cookie, ns_random="true"):
     :return: 签到结果信息
     """
     if not ns_cookie:
-        print("未设置NodeSeek Cookie，请检查NS_COOKIE环境变量设置是否正确")
-        return "签到失败：未设置NodeSeek Cookie，请检查NS_COOKIE环境变量设置是否正确"
+        print(f"未设置NodeSeek Cookie，请检查{NS_COOKIE_ENV_NAME}环境变量设置是否正确")
+        return f"签到失败：未设置NodeSeek Cookie，请检查{NS_COOKIE_ENV_NAME}环境变量设置是否正确"
 
     url = f"https://www.nodeseek.com/api/attendance?random={ns_random}"
     headers = {

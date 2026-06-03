@@ -91,15 +91,22 @@ def get_ns_env(name, default="", fallback_to_base=False):
     return os.environ.get(name, default)
 
 
+def get_ns_env_name(name):
+    """Return the NodeSeek env var name expected for the selected account."""
+    return f"{name}_{NS_ACCOUNT}" if NS_ACCOUNT else name
+
+
 class EnvConfig:
     """环境变量配置类，集中管理所有配置参数"""
 
     # NodeSeek配置
     ns_cookie = get_ns_env("NS_COOKIE", "")  # 用户Cookie
+    ns_cookie_env_name = get_ns_env_name("NS_COOKIE")
     ns_random = (
         get_ns_env("NS_RANDOM", "true", fallback_to_base=True).lower() == "true"
     )  # 随机签到开关
     ns_member_id = get_ns_env("NS_MEMBER_ID", "")  # 成员ID（从个人空间URL获取）
+    ns_member_id_env_name = get_ns_env_name("NS_MEMBER_ID")
 
     # DeepFlood配置
     df_cookie = os.environ.get("DF_COOKIE", "")  # 用户Cookie
@@ -199,10 +206,23 @@ class BaseForum:
 class NodeSeekForum(BaseForum):
     """NodeSeek论坛签到实现"""
 
+    def __init__(
+        self,
+        base_url,
+        cookie,
+        member_id,
+        random_signin,
+        cookie_env_name="NS_COOKIE",
+        member_id_env_name="NS_MEMBER_ID",
+    ):
+        super().__init__(base_url, cookie, member_id, random_signin)
+        self.cookie_env_name = cookie_env_name
+        self.member_id_env_name = member_id_env_name
+
     def get_member_info(self):
         """获取NodeSeek用户信息"""
         if not self.member_id:
-            return "用户信息获取失败：未设置NS_MEMBER_ID环境变量"
+            return f"用户信息获取失败：未设置{self.member_id_env_name}环境变量"
 
         # 构造用户信息请求URL
         info_url = f"{self.base_url}/api/account/getInfo/{self.member_id}?readme=1"
@@ -232,7 +252,7 @@ class NodeSeekForum(BaseForum):
     def sign_in(self):
         """执行NodeSeek签到"""
         if not self.cookie:
-            return "签到失败：未设置NS_COOKIE环境变量"
+            return f"签到失败：未设置{self.cookie_env_name}环境变量"
 
         # 构造签到请求URL
         sign_url = f"{self.base_url}/api/attendance?random={'true' if self.random_signin else 'false'}"
@@ -433,10 +453,12 @@ def main():
             cookie=env.ns_cookie,
             member_id=env.ns_member_id,
             random_signin=env.ns_random,
+            cookie_env_name=env.ns_cookie_env_name,
+            member_id_env_name=env.ns_member_id_env_name,
         )
         run_forum_signin(nodeseek, "NodeSeek")
     else:
-        print("未配置NodeSeek的Cookie（NS_COOKIE），跳过NodeSeek签到")
+        print(f"未配置NodeSeek的Cookie（{env.ns_cookie_env_name}），跳过NodeSeek签到")
 
     # 执行DeepFlood签到
     if env.df_cookie:  # 只有配置了Cookie才执行
