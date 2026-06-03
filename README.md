@@ -46,12 +46,48 @@ git+https://github.com/VeNoMouS/cloudscraper.git
 | `NS_COOKIE`     | 是   | 无     | NodeSeek 登录 Cookie，F12 控制台获取          |
 | `NS_RANDOM`     | 否   | true   | 签到模式: true(随机鸡腿)/false(固定5个鸡腿)   |
 | `NS_MEMBER_ID`  | 否   | 无     | 成员ID，用于查询账户信息(空间页URL中的数字ID) |
+| `NS_ACCOUNT`    | 否   | 无     | 多账号选择编号，设置后读取对应后缀变量，如 `NS_COOKIE_1` |
+| `NS_COOKIE_1`   | 否   | 无     | NodeSeek 第1个账号 Cookie，编号可改为 `_2`、`_3` |
+| `NS_RANDOM_1`   | 否   | true   | NodeSeek 第1个账号签到模式，不填则使用 `NS_RANDOM` |
+| `NS_MEMBER_ID_1`| 否   | 无     | NodeSeek 第1个账号成员ID，编号可改为 `_2`、`_3` |
 | `DF_COOKIE`     | 是   | 无     | NodeSeek 登录 Cookie，F12 控制台获取          |
 | `DF_RANDOM`     | 否   | true   | 签到模式: true(随机鸡腿)/false(固定5个鸡腿)   |
 | `DF_MEMBER_ID`  | 否   | 无     | 成员ID，用于查询账户信息(空间页URL中的数字ID) |
 | `PROXIES`    | 否   | 无     | 代理配置：http/https，多个请用","英文逗号隔开 |
 | `DD_BOT_TOKEN`  | 否   | 无     | 钉钉机器人 access_token 的 Token 部分         |
 | `DD_BOT_SECRET` | 否   | 无     | 钉钉机器人加签密钥(选择加签安全模式时需要)    |
+
+#### NodeSeek多账号分开定时
+
+如果需要多个NodeSeek账号分开签到时间，不要把多个Cookie写进同一个变量。建议给每个账号配置一组带编号的变量，然后给每个青龙任务单独设置 `NS_ACCOUNT`。
+
+账号变量示例：
+
+```bash
+NS_COOKIE_1=账号1Cookie
+NS_MEMBER_ID_1=账号1成员ID
+
+NS_COOKIE_2=账号2Cookie
+NS_MEMBER_ID_2=账号2成员ID
+
+NS_COOKIE_3=账号3Cookie
+NS_MEMBER_ID_3=账号3成员ID
+```
+
+任务配置示例：
+
+```bash
+# 任务1，08:10执行
+NS_ACCOUNT=1
+
+# 任务2，09:35执行
+NS_ACCOUNT=2
+
+# 任务3，11:20执行
+NS_ACCOUNT=3
+```
+
+设置 `NS_ACCOUNT=2` 时，脚本会读取 `NS_COOKIE_2`、`NS_MEMBER_ID_2`、`NS_RANDOM_2`。如果没有设置 `NS_RANDOM_2`，会回退使用全局 `NS_RANDOM`，仍未设置则默认 `true`。
 
 ## 📝 注意事项
 

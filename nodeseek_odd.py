@@ -55,14 +55,30 @@ scraper = cloudscraper.create_scraper(
 # ==============================================
 
 # NodeSeek环境变量
+## 多账号选择。设置 NS_ACCOUNT=1 时读取 NS_COOKIE_1 / NS_MEMBER_ID_1。
+NS_ACCOUNT = os.environ.get("NS_ACCOUNT", "").strip()
+
+
+def get_ns_env(name, default="", fallback_to_base=False):
+    """按 NS_ACCOUNT 选择账号环境变量，未设置 NS_ACCOUNT 时保持原有变量名兼容。"""
+    if NS_ACCOUNT:
+        value = os.environ.get(f"{name}_{NS_ACCOUNT}")
+        if value is not None:
+            return value
+        if fallback_to_base:
+            return os.environ.get(name, default)
+        return default
+    return os.environ.get(name, default)
+
+
 ## 获取NodeSeek Cookie环境变量
-NS_COOKIE = os.environ.get("NS_COOKIE", "")
+NS_COOKIE = get_ns_env("NS_COOKIE", "")
 
 ## NodeSeek签到模式：true->随机签到 false->固定签到，默认随机签到
-NS_RANDOM = os.environ.get("NS_RANDOM", "true")
+NS_RANDOM = get_ns_env("NS_RANDOM", "true", fallback_to_base=True)
 
 ## NodeSeek成员ID，https://www.nodeseek.com/space/26589 ->26589就是成员ID
-NS_MEMBER_ID = os.environ.get("NS_MEMBER_ID", "")
+NS_MEMBER_ID = get_ns_env("NS_MEMBER_ID", "")
 
 # 钉钉机器人通知（本地运行，直接填写下面三个环境变量即可）
 ## 本地运行请给为True，默认为False，调用青龙系统通知API

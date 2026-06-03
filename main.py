@@ -76,13 +76,30 @@ scraper = init_scraper()
 # ==============================================
 # 环境变量配置（Environment Configuration）
 # ==============================================
+NS_ACCOUNT = os.environ.get("NS_ACCOUNT", "").strip()
+
+
+def get_ns_env(name, default="", fallback_to_base=False):
+    """Select NodeSeek env vars by NS_ACCOUNT while keeping the original names compatible."""
+    if NS_ACCOUNT:
+        value = os.environ.get(f"{name}_{NS_ACCOUNT}")
+        if value is not None:
+            return value
+        if fallback_to_base:
+            return os.environ.get(name, default)
+        return default
+    return os.environ.get(name, default)
+
+
 class EnvConfig:
     """环境变量配置类，集中管理所有配置参数"""
 
     # NodeSeek配置
-    ns_cookie = os.environ.get("NS_COOKIE", "")  # 用户Cookie
-    ns_random = os.environ.get("NS_RANDOM", "true").lower() == "true"  # 随机签到开关
-    ns_member_id = os.environ.get("NS_MEMBER_ID", "")  # 成员ID（从个人空间URL获取）
+    ns_cookie = get_ns_env("NS_COOKIE", "")  # 用户Cookie
+    ns_random = (
+        get_ns_env("NS_RANDOM", "true", fallback_to_base=True).lower() == "true"
+    )  # 随机签到开关
+    ns_member_id = get_ns_env("NS_MEMBER_ID", "")  # 成员ID（从个人空间URL获取）
 
     # DeepFlood配置
     df_cookie = os.environ.get("DF_COOKIE", "")  # 用户Cookie
