@@ -104,11 +104,6 @@ DD_BOT_TOKEN = os.environ.get("DD_BOT_TOKEN", "")
 ## 钉钉机器人Secret
 DD_BOT_SECRET = os.environ.get("DD_BOT_SECRET", "")
 
-## 通知策略：默认只在失败时推送，设置为false可恢复每次运行都推送
-NS_NOTIFY_ONLY_ON_FAILURE = (
-    os.environ.get("NS_NOTIFY_ONLY_ON_FAILURE", "true").lower() == "true"
-)
-
 # ==============================================
 # 工具函数 (Utility Functions)
 # ==============================================
@@ -121,16 +116,6 @@ def wait_random_interval(min_seconds, max_seconds):
     print(f"等待 {delay:.2f} 秒后继续...")
     time.sleep(delay)
     print("执行下一步操作！")
-
-
-def has_failure_result(*messages):
-    """判断本次运行结果是否需要失败通知。"""
-    failure_keywords = ("失败", "报错", "未设置", "错误", "异常")
-    return any(
-        keyword in str(message)
-        for message in messages
-        for keyword in failure_keywords
-    )
 
 
 # ==============================================
@@ -299,17 +284,10 @@ if __name__ == "__main__":
     print("=========================正在推送NodeSeek签到信息=========================")
     try:
         content = f"{str(ns_info_data)}\n{str(ns_signin_data)}\n时间：{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}"
-        should_notify = (
-            not NS_NOTIFY_ONLY_ON_FAILURE
-            or has_failure_result(ns_info_data, ns_signin_data)
-        )
-        if should_notify:
-            if DD_BOT_ENABLE:
-                send_to_dingtalk(DD_BOT_TOKEN, DD_BOT_SECRET, content)
-            else:
-                message_push("「NodeSeek签到」", content)
+        if DD_BOT_ENABLE:
+            send_to_dingtalk(DD_BOT_TOKEN, DD_BOT_SECRET, content)
         else:
-            print("本次NodeSeek签到未发现失败结果，跳过通知推送")
+            message_push("「NodeSeek签到」", content)
     except Exception as e:
         print("推送失败，错误信息: ", str(e))
         print(
