@@ -125,6 +125,13 @@ class EnvConfig:
     )  # 钉钉开关
     dd_bot_token = os.environ.get("DD_BOT_TOKEN", "")  # 机器人Token
     dd_bot_secret = os.environ.get("DD_BOT_SECRET", "")  # 机器人密钥
+    notify_only_on_failure = (
+        os.environ.get(
+            "NOTIFY_ONLY_ON_FAILURE",
+            os.environ.get("NS_NOTIFY_ONLY_ON_FAILURE", "true"),
+        ).lower()
+        == "true"
+    )
 
 
 # 实例化配置对象
@@ -150,6 +157,16 @@ def random_wait(min_sec, max_sec):
 def get_current_time():
     """获取当前时间的格式化字符串"""
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+
+def has_failure_result(*messages):
+    """判断本次运行结果是否需要失败通知。"""
+    failure_keywords = ("失败", "报错", "未设置", "错误", "异常")
+    return any(
+        keyword in str(message)
+        for message in messages
+        for keyword in failure_keywords
+    )
 
 
 # ==============================================
@@ -445,7 +462,14 @@ def run_forum_signin(forum, forum_name):
 
     # 推送通知
     print(f"\n【3/3】正在推送{forum_name}签到结果...")
-    push_notification(forum_name, user_info, sign_result)
+    should_notify = (
+        not env.notify_only_on_failure
+        or has_failure_result(user_info, sign_result)
+    )
+    if should_notify:
+        push_notification(forum_name, user_info, sign_result)
+    else:
+        print(f"本次{forum_name}签到未发现失败结果，跳过通知推送")
 
     print(f"======================= {forum_name}签到流程结束 =======================\n")
 

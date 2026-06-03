@@ -50,6 +50,7 @@ git+https://github.com/VeNoMouS/cloudscraper.git
 | `NS_COOKIE_1`   | 否   | 无     | NodeSeek 第1个账号 Cookie，编号可改为 `_2`、`_3` |
 | `NS_RANDOM_1`   | 否   | true   | NodeSeek 第1个账号签到模式，不填则使用 `NS_RANDOM` |
 | `NS_MEMBER_ID_1`| 否   | 无     | NodeSeek 第1个账号成员ID，编号可改为 `_2`、`_3` |
+| `NS_NOTIFY_ONLY_ON_FAILURE` | 否 | true | 通知策略，默认只在失败/报错时推送，设为 `false` 可每次都推送 |
 | `DF_COOKIE`     | 是   | 无     | NodeSeek 登录 Cookie，F12 控制台获取          |
 | `DF_RANDOM`     | 否   | true   | 签到模式: true(随机鸡腿)/false(固定5个鸡腿)   |
 | `DF_MEMBER_ID`  | 否   | 无     | 成员ID，用于查询账户信息(空间页URL中的数字ID) |
