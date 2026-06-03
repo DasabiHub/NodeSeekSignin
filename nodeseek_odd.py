@@ -13,6 +13,7 @@ import hashlib
 import hmac
 import os
 import random
+import sys
 import time
 import urllib.parse
 
@@ -55,8 +56,13 @@ scraper = cloudscraper.create_scraper(
 # ==============================================
 
 # NodeSeek环境变量
-## 多账号选择。设置 NS_ACCOUNT=1 时读取 NS_COOKIE_1 / NS_MEMBER_ID_1。
+## 多账号选择。设置 NS_ACCOUNT=1 或传入脚本参数 1 时读取 NS_COOKIE_1 / NS_MEMBER_ID_1。
 NS_ACCOUNT = os.environ.get("NS_ACCOUNT", "").strip()
+if not NS_ACCOUNT:
+    for arg in sys.argv[1:]:
+        if arg.isdigit():
+            NS_ACCOUNT = arg
+            break
 
 
 def get_ns_env(name, default="", fallback_to_base=False):
@@ -251,6 +257,10 @@ def message_push(title, message):
 # 主程序入口 (Main Entry)
 # ==============================================
 if __name__ == "__main__":
+    if NS_ACCOUNT:
+        print(f"NodeSeek账号选择：NS_ACCOUNT={NS_ACCOUNT}，读取{NS_COOKIE_ENV_NAME}/{NS_MEMBER_ID_ENV_NAME}")
+    else:
+        print(f"NodeSeek账号选择：未设置NS_ACCOUNT，读取{NS_COOKIE_ENV_NAME}/{NS_MEMBER_ID_ENV_NAME}")
     wait_random_interval(5, 20)  # 随机等待10-20秒
     print("===========================正在进行NodeSeek签到==========================")
     # 示例输出：签到信息:今天已完成签到，请勿重复操作

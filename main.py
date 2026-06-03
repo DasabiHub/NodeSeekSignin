@@ -14,6 +14,7 @@ import hashlib
 import hmac
 import os
 import random
+import sys
 import time
 import urllib.parse
 
@@ -77,6 +78,11 @@ scraper = init_scraper()
 # 环境变量配置（Environment Configuration）
 # ==============================================
 NS_ACCOUNT = os.environ.get("NS_ACCOUNT", "").strip()
+if not NS_ACCOUNT:
+    for arg in sys.argv[1:]:
+        if arg.isdigit():
+            NS_ACCOUNT = arg
+            break
 
 
 def get_ns_env(name, default="", fallback_to_base=False):
@@ -446,6 +452,15 @@ def run_forum_signin(forum, forum_name):
 
 def main():
     """主程序入口"""
+    if NS_ACCOUNT:
+        print(
+            f"NodeSeek账号选择：NS_ACCOUNT={NS_ACCOUNT}，读取{env.ns_cookie_env_name}/{env.ns_member_id_env_name}"
+        )
+    else:
+        print(
+            f"NodeSeek账号选择：未设置NS_ACCOUNT，读取{env.ns_cookie_env_name}/{env.ns_member_id_env_name}"
+        )
+
     # 执行NodeSeek签到
     if env.ns_cookie:  # 只有配置了Cookie才执行
         nodeseek = NodeSeekForum(
